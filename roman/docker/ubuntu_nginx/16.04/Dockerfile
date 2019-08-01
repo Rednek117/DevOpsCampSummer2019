@@ -2,14 +2,22 @@ FROM ubuntu:16.04
 
 MAINTAINER Roman Sharaev 
 
-RUN apt-get update && apt-get -y dist-upgrade 
-RUN apt-get -yq install net-tools nginx
-RUN rm -f /etc/nginx/fastcgi.conf /etc/nginx/fastcgi_params && \
-	rm -f etc/nginx/snippets/fastcgi-php.conf
+RUN apt-get update -y
+RUN apt-get install -y python-software-properties
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:nginx/stable
+RUN apt-get update -y
+RUN apt-get install -y nginx
 
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+RUN chown -R www-data:www-data /var/lib/nginx
 
-EXPOSE 8080
+VOLUME ["/etc/nginx/sites-enabled", "/etc/nginx/certs", "/var/log/nginx"]
 
-ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon off;"]
+EXPOSE 80 443
+
+ADD config/nginx.conf /etc/nginx/conf.d/default.conf
+
+CMD ["nginx"]
 
 
